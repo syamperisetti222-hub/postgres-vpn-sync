@@ -1,38 +1,61 @@
 """Schema synchronization module"""
 
-from src.logger import get_logger
 
-logger = get_logger(__name__)
+def schema_exists(connection, schema_name):
+    """
+    Check if schema exists in PostgreSQL database.
+    
+    Args:
+        connection: psycopg connection object
+        schema_name: str - name of schema
+    
+    Returns:
+        bool: True if schema exists
+    """
+    query = """
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.schemata
+            WHERE schema_name = %s
+        );
+    """
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, (schema_name,))
+        return cursor.fetchone()[0]
 
 
-class SchemaSync:
-    """Synchronize database schemas"""
+def create_schema(connection, schema_name):
+    """
+    Create schema in PostgreSQL database.
+    
+    Args:
+        connection: psycopg connection object
+        schema_name: str - name of schema to create
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema_name}"')
+    
+    connection.commit()
 
-    def __init__(self, master_conn, replica_conn):
-        self.master_conn = master_conn
-        self.replica_conn = replica_conn
 
-    def get_schema_from_master(self):
-        """Retrieve schema from master database"""
-        query = """
-            SELECT table_name FROM information_schema.tables
-            WHERE table_schema = 'public'
-        """
-        try:
-            tables = self.master_conn.fetch_all(query)
-            logger.info(f"Retrieved {len(tables)} tables from master")
-            return tables
-        except Exception as e:
-            logger.error(f"Failed to get schema: {e}")
-            raise
-
-    def sync_schema(self):
-        """Synchronize schema from master to replica"""
-        try:
-            logger.info("Starting schema synchronization")
-            tables = self.get_schema_from_master()
-            logger.info(f"Schema synchronization completed for {len(tables)} tables")
-            return True
-        except Exception as e:
-            logger.error(f"Schema synchronization failed: {e}")
-            return False
+def get_schemas(connection):
+    """
+    Get list of all schemas in database.
+    
+    Args:
+        connection: psycopg connection object
+    
+    Returns:
+        list: schema names
+    """
+    query = """
+        SELECT schema_name
+        FROM information_schema.schemata
+        WHERE schema_name NOT IN ('pg_catalog', 'information_schema')
+        ORDER BY schema_name;
+    """
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        return [row[0] for row in cursor.fetchall()]
