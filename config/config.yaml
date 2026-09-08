@@ -1,0 +1,25 @@
+# PostgreSQL VPN Sync Configuration
+
+# Master Database Configuration
+master_db:
+  host: localhost
+  port: 5432
+  database: postgres
+  user: postgres
+  password: password
+
+# Replica Database Configuration
+replica_db:
+  host: localhost
+  port: 5432
+  database: postgres
+  user: postgres
+  password: password
+
+# Sync Configuration
+sync:
+  schema_sync: true
+  table_sync: true
+  data_sync: true
+  batch_size: 1000
+  log_level: INFO
