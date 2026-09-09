@@ -1,21 +1,14 @@
-"""Test database connection module"""
-
-import pytest
+from src.config import load_config
 from src.db import DatabaseConnection
 
 
-class TestDatabaseConnection:
-    """Test database connection functionality"""
+def test_connection_initialization():
 
-    def test_connection_initialization(self):
-        """Test connection initialization"""
-        config = {
-            'host': 'localhost',
-            'port': 5432,
-            'database': 'test_db',
-            'user': 'test_user',
-            'password': 'test_password'
-        }
-        conn = DatabaseConnection(config)
-        assert conn.config == config
-        assert conn.connection is None
+    config = load_config()
+
+    local_config = config["local_database"]
+
+    conn = DatabaseConnection(local_config)
+
+    assert conn.config == local_config
+    assert conn.connection is None
