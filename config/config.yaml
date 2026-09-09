@@ -3,15 +3,15 @@
 local_database:
   host: "localhost"
   port: 5432
-  database: "pos_local"
+  database: "postgres"
   username: "postgres"
   password: "local_password"
 
 master_database:
   host: "10.10.10.10"
   port: 5432
-  database: "pos_master"
-  username: "sync_user"
+  database: "postgres"
+  username: "postgres"
   password: "master_password"
 
 sync:
